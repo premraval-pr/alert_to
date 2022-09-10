@@ -1,2 +1,0 @@
-0 Apple
-1 Orange
