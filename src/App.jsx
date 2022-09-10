@@ -3,12 +3,13 @@ import "./App.css";
 import {
   Gyroscope,
   Accelerometer,
-  AbsoluteOrientationSensor,
+  GravitySensor,
 } from "motion-sensors-polyfill";
 
 function App() {
   const [text, setText] = React.useState("Init");
-  const sensor = new Gyroscope();
+  const [alert, setAlert] = React.useState();
+  const sensor = new GravitySensor();
 
   function initSensor() {
     try {
@@ -26,11 +27,14 @@ function App() {
       }
 
       sensor.onreading = () => {
-        setText("Sensor is reading");
         setText(
-          `X-Axis - ${sensor.x} | Y-Axis - ${sensor.y} | Z-Axis - ${sensor.z}`
+          `X-Axis : ${sensor.x} | Y-Axis : ${sensor.y} | Z-Axis : ${sensor.z}`
         );
-        console.log(sensor);
+        if (parseInt(sensor.y) > 2.2) {
+          setAlert("Phone Up");
+        } else {
+          setAlert("Phone Down");
+        }
       };
 
       sensor.onerror = (event) => {
@@ -64,6 +68,7 @@ function App() {
   return (
     <div className="App">
       <p>{text}</p>
+      <p>{alert}</p>
     </div>
   );
 }
