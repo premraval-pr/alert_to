@@ -1,30 +1,30 @@
 import React from "react";
 import "./App.css";
 import { useGravitySensor } from "./hooks";
+import { getStreamData, getSoundClassifier } from "./clients";
 
 function App() {
-  const { data, error } = useGravitySensor();
+  const { data: gravitySensorData, error: gravitySensorError } =
+    useGravitySensor();
 
-  React.useEffect(() => {
-    const source = new EventSource("http://localhost:4242/data");
-    source.addEventListener("open", () => {
-      console.log("SSE opened!");
+  const { data: streamData, error: stremError } = getStreamData(
+    "http://localhost:4242/data"
+  );
+
+  const { data: soundClassifierData, error: soundClassifierError } =
+    getSoundClassifier("SpeechCommands18w", {
+      probabilityThreshold: 0.7,
     });
 
-    source.addEventListener("message", (e) => {
-      console.log(e.data);
-    });
+  console.log("gravitySensorData", gravitySensorData);
+  console.log("streamData", streamData);
+  console.log("soundClassifierData", soundClassifierData);
 
-    source.addEventListener("error", (e) => {
-      console.error("Error: ", e);
-    });
+  console.error("gravitySensorError", gravitySensorError);
+  console.error("stremError", stremError);
+  console.error("soundClassifierError", soundClassifierError);
 
-    return () => {
-      source.close();
-    };
-  }, []);
-
-  return <div className="App">{error ? <p>{error}</p> : <p>{data}</p>}</div>;
+  return <div className="App">Hello</div>;
 }
 
 export default App;
