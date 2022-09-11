@@ -1,29 +1,26 @@
 import React from "react";
 import "./App.css";
-import { useGravitySensor } from "./hooks";
+import { useGravitySensor, useLinearAccelerationSensor } from "./hooks";
 import { getStreamData, getSoundClassifier } from "./clients";
+
+const BASE_URL = "http://localhost:4242/data";
+const soundModel = "SpeechCommands18w";
 
 function App() {
   const { data: gravitySensorData, error: gravitySensorError } =
     useGravitySensor();
 
-  const { data: streamData, error: stremError } = getStreamData(
-    "http://localhost:4242/data"
-  );
+  const { data: linearSensorData, error: linearSensorError } =
+    useLinearAccelerationSensor();
+
+  const { data: streamData, error: streamError } = getStreamData(BASE_URL);
 
   const { data: soundClassifierData, error: soundClassifierError } =
-    getSoundClassifier("SpeechCommands18w", {
+    getSoundClassifier(soundModel, {
       probabilityThreshold: 0.7,
     });
 
-  console.log("gravitySensorData", gravitySensorData);
-  console.log("streamData", streamData);
-  console.log("soundClassifierData", soundClassifierData);
-
-  console.error("gravitySensorError", gravitySensorError);
-  console.error("stremError", stremError);
-  console.error("soundClassifierError", soundClassifierError);
-
+  console.log(soundClassifierData);
   return <div className="App">Hello</div>;
 }
 
