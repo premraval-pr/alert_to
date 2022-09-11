@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Row, Col, Container, Button } from "react-bootstrap";
 import { useGravitySensor, useLinearAccelerationSensor } from "./hooks";
 import { getStreamData, getSoundClassifier } from "./clients";
+import Alert from "react-bootstrap/Alert";
 import {
   LinearAccelerationSensor,
   GravitySensor,
@@ -25,13 +26,37 @@ function App() {
   const [detectedTireScreech, setDetectedTireScreech] = useState(false);
   const [foundFastCar, setFoundFastCar] = useState(false);
 
+  const [currentCarIndex, setCurrentCarIndex] = React.useState(0);
+  const carSpeedData = [
+    { car: 1, speed: 39 },
+    { car: 2, speed: 50 },
+    { car: 3, speed: 24 },
+    { car: 4, speed: 31 },
+    { car: 5, speed: 38 },
+    { car: 6, speed: 40 },
+    { car: 7, speed: 29 },
+    { car: 8, speed: 41 },
+    { car: 9, speed: 74 },
+    { car: 10, speed: 85 },
+    { car: 11, speed: 30 },
+    { car: 12, speed: 47 },
+    { car: 13, speed: 65 },
+    { car: 14, speed: 54 },
+    { car: 15, speed: 67 },
+    { car: 16, speed: 89 },
+    { car: 17, speed: 31 },
+    { car: 18, speed: 67 },
+    { car: 19, speed: 56 },
+    { car: 20, speed: 44 },
+  ];
+
   // const { data: gravitySensorData, error: gravitySensorError } =
   //   useGravitySensor();
 
   // const { data: linearSensorData, error: linearSensorError } =
   //   useLinearAccelerationSensor();
 
-  const { data: streamData, error: streamError } = getStreamData(BASE_URL);
+  //const { data: streamData, error: streamError } = getStreamData(BASE_URL);
 
   const { data: soundClassifierData, error: soundClassifierError } =
     getSoundClassifier(soundModel, {
@@ -68,16 +93,12 @@ function App() {
       console.log(error);
     }
 
-    console.log("streamData", streamData);
-    
-    if (streamData) {
-      if (parseInt(streamData.speed) > 60) {
-        console.log("ZOOOOOOOOOOMMMMMMMMM!!!!!!");
-        // setFoundFastCar(true);
-      } else {
-        // setFoundFastCar(false);
-      }
-    }
+    // if (streamData) {
+    //   if (parseInt(streamData.speed) > 60) {
+    //     console.log("ZOOOOOOOOOOMMMMMMMMM!!!!!!");
+    //     setFoundFastCar(true);
+    //   }
+    // }
 
     if (soundClassifierData) {
       const soundConfidence = soundClassifierData.find(
@@ -86,9 +107,9 @@ function App() {
 
       if (parseFloat(soundConfidence) > 0.95) {
         console.log("SCREEEEEEEECHHHHHHH!!!!!!");
-        // setDetectedTireScreech(true);
-      } else {
-        // setDetectedTireScreech(false);
+        if (!detectedTireScreech) {
+          setDetectedTireScreech(true);
+        }
       }
     }
   };
@@ -175,9 +196,61 @@ function App() {
 
   InitSetup();
 
+  // useEffect(() => {
+  //   const id = setTimeout(() => {
+
+  //     if (parseInt((currentCarIndex + 1) % carSpeedData.length.speed) > 60) {
+  //       console.log("ZOOOOOOOOOOMMMMMMMMM!!!!!!");
+  //       if (!foundFastCar) {
+  //         setFoundFastCar(true);
+  //       }
+  //     }
+  //   }, 500);
+
+  //   return () => {
+  //     clearInterval(id);
+  //   };
+  // }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (detectedTireScreech) setDetectedTireScreech(false);
+      if (foundFastCar) setFoundFastCar(false);
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="App">
-      <Container fluid>
+      <Container fluid style={{ padding: 0 }}>
+        {detectedTireScreech && (
+          <div style={{ textAlign: "center" }}>
+            <Alert variant="danger">
+              We have found a car skidding near your. Please be alert of your
+              surroundings.
+            </Alert>
+          </div>
+        )}
+        {/* {foundFastCar && (
+          <div style={{ marginBottom: "-20px", textAlign: "center" }}>
+            <Alert variant="danger">
+              We have found a high speeding car near your vicinity. Please be
+              alert of your surroundings.
+            </Alert>
+          </div>
+        )} */}
+        <Row>
+          <Col>
+            {detectedTireScreech && (
+              <div style={{ marginBottom: "-20px", textAlign: "center" }}>
+                <Alert variant="danger">
+                  We have found a car skidding near your. Please be alert of
+                  your surroundings.
+                </Alert>
+              </div>
+            )}
+          </Col>
+        </Row>
         <Row style={{ height: "400px" }}>
           <Col
             style={
