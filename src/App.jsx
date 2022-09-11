@@ -1,6 +1,5 @@
-import React,{ useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Row, Col, Container, Button } from "react-bootstrap";
-import "./App.css";
 import { useGravitySensor, useLinearAccelerationSensor } from "./hooks";
 import { getStreamData, getSoundClassifier } from "./clients";
 
