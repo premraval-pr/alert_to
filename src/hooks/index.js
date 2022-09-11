@@ -1,38 +1,43 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import {
+  Gyroscope,
+  Accelerometer,
+  GravitySensor,
+} from "motion-sensors-polyfill";
 
-const useAbsoluteOrientation = (
-  { frequency, referenceFrame } = {},
-  callback
-) => {
-  const [quaternion, setQuaternion] = useState([]);
+const useGravitySensor = () => {
+  const [data, setData] = useState();
+  const [error, setError] = useState();
+  const sensor = new GravitySensor();
 
   useEffect(() => {
-    const options = { frequency, referenceFrame };
-    let sensor = new window.AbsoluteOrientationSensor(options);
-
-    if (sensor) {
-      // https://developer.mozilla.org/en-US/docs/Web/API/AbsoluteOrientationSensor#basic_example
-      sensor.addEventListener("reading", () => {
-        setQuaternion([...sensor.quaternion]);
-
-        if (callback instanceof Function) {
-          callback({
-            ...sensor.quaternion,
-          });
-        }
-      });
-      sensor.addEventListener("error", (error) => {
-        if (error.name === "NotReadableError") {
-          console.log("Sensor is not available.");
-        }
-      });
+    try {
       sensor.start();
+      sensor.onreading = () => {
+        setData(sensor);
+      };
+
+      sensor.onerror = (event) => {
+        if (event.error.name === "NotAllowedError") {
+          setError("Permission to access sensor was denied.");
+        } else if (event.error.name === "NotReadableError") {
+          setError("Cannot connect to the sensor.");
+        }
+      };
+    } catch (error) {
+      if (error.name === "SecurityError") {
+        setError("Sensor construction was blocked by the Permissions Policy.");
+      } else if (error.name === "ReferenceError") {
+        setError("Sensor is not supported by the User Agent.");
+      } else {
+        setError(error.message);
+      }
     }
 
     return () => {};
-  }, [callback, frequency, referenceFrame]);
+  }, []);
 
-  return quaternion;
+  return { data, error };
 };
 
-export { useAbsoluteOrientation };
+export { useGravitySensor };
