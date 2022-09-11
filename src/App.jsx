@@ -20,8 +20,6 @@ function App() {
       probabilityThreshold: 0.7,
     });
 
-  console.log(soundClassifierData);
-
   const [latLng, setLatLng] = useState({ lat: 0, lng: 0 });
   const [isWithinRadius, setIsWithinRadius] = useState(true);
   const [latDistance, setLatDistance] = useState(0);
@@ -83,6 +81,33 @@ function App() {
   // function toRad(Value) {
   //   return Value * Math.PI / 180;
   // }
+
+  useEffect(() => {
+    if (gravitySensorData) {
+      if (parseFloat(gravitySensorData.y) > 2.2) {
+        setIsPhoneUp(true);
+      } else {
+        setIsPhoneUp(false);
+      }
+    }
+  }, [gravitySensorData]);
+
+  useEffect(() => {
+    if (linearSensorData) {
+      if (
+        parseFloat(linearSensorData.x) > 0.4 ||
+        parseFloat(linearSensorData.y) > 0.4 ||
+        parseFloat(linearSensorData.z) > 0.4 ||
+        parseFloat(linearSensorData.x) < -0.4 ||
+        parseFloat(linearSensorData.y) < -0.4 ||
+        parseFloat(linearSensorData.z) < -0.4
+      ) {
+        setIsWalking(true);
+      } else {
+        setIsWalking(false);
+      }
+    }
+  }, [linearSensorData]);
 
   return (
     <div className="App">
