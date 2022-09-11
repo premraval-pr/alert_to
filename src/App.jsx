@@ -8,9 +8,12 @@ import {
 } from "motion-sensors-polyfill";
 
 const BASE_URL = "http://localhost:4242/data";
-const soundModel = "SpeechCommands18w";
+const soundModel = new URL("/public/ml/model.json", import.meta.url).href;
 
 function App() {
+  const gravitySensor = new GravitySensor();
+  const linearAccelerationSensor = new LinearAccelerationSensor();
+
   // const { data: gravitySensorData, error: gravitySensorError } =
   //   useGravitySensor();
 
@@ -19,13 +22,24 @@ function App() {
 
   // const { data: streamData, error: streamError } = getStreamData(BASE_URL);
 
-  // const { data: soundClassifierData, error: soundClassifierError } =
-  //   getSoundClassifier(soundModel, {
-  //     probabilityThreshold: 0.7,
-  //   });
+  const { data: soundClassifierData, error: soundClassifierError } =
+    getSoundClassifier(soundModel, {
+      probabilityThreshold: 0.7,
+    });
 
-  const gravitySensor = new GravitySensor();
-  const linearAccelerationSensor = new LinearAccelerationSensor();
+  const soundConfidence = soundClassifierData.find(
+    (item) => item.label === "Tire Screech"
+  ).confidence;
+
+  console.log(
+    soundClassifierData.find((item) => item.label === "Tire Screech").confidence
+  );
+
+  if (soundConfidence > 0.95) {
+    console.log("FOUNDDDDDDDDDDDDDDDDDDD ITTTTTTT");
+  }
+
+  // console.log("soundClassifierError", soundClassifierError);
 
   try {
     gravitySensor.start();
