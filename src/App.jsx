@@ -14,62 +14,6 @@ function App() {
   const gravitySensor = new GravitySensor();
   const linearAccelerationSensor = new LinearAccelerationSensor();
 
-  // const { data: gravitySensorData, error: gravitySensorError } =
-  //   useGravitySensor();
-
-  // const { data: linearSensorData, error: linearSensorError } =
-  //   useLinearAccelerationSensor();
-
-  // const { data: streamData, error: streamError } = getStreamData(BASE_URL);
-
-  const { data: soundClassifierData, error: soundClassifierError } =
-    getSoundClassifier(soundModel, {
-      probabilityThreshold: 0.7,
-    });
-
-  const soundConfidence = soundClassifierData.find(
-    (item) => item.label === "Tire Screech"
-  ).confidence;
-
-  console.log(
-    soundClassifierData.find((item) => item.label === "Tire Screech").confidence
-  );
-
-  if (soundConfidence > 0.95) {
-    console.log("FOUNDDDDDDDDDDDDDDDDDDD ITTTTTTT");
-  }
-
-  // console.log("soundClassifierError", soundClassifierError);
-
-  try {
-    gravitySensor.start();
-    gravitySensor.onreading = () => {
-      if (parseInt(gravitySensor.y) > 2) {
-        setIsPhoneUp(true);
-      } else {
-        setIsPhoneUp(false);
-      }
-    };
-  } catch (error) {
-    console.log(error);
-  }
-
-  try {
-    linearAccelerationSensor.start();
-    linearAccelerationSensor.onreading = () => {
-      if (
-        parseFloat(linearAccelerationSensor.x) > 0.6 ||
-        parseFloat(linearAccelerationSensor.x) < -0.6
-      ) {
-        setIsWalking(true);
-      } else {
-        setIsWalking(false);
-      }
-    };
-  } catch (error) {
-    console.log(error);
-  }
-
   const [latLng, setLatLng] = useState({ lat: 0, lng: 0 });
   const [isWithinRadius, setIsWithinRadius] = useState(true);
   const [latDistance, setLatDistance] = useState(0);
@@ -78,6 +22,76 @@ function App() {
   const [isPhoneUp, setIsPhoneUp] = useState(false);
   const [isWalking, setIsWalking] = useState(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [detectedTireScreech, setDetectedTireScreech] = useState(false);
+  const [foundFastCar, setFoundFastCar] = useState(false);
+
+  // const { data: gravitySensorData, error: gravitySensorError } =
+  //   useGravitySensor();
+
+  // const { data: linearSensorData, error: linearSensorError } =
+  //   useLinearAccelerationSensor();
+
+  const { data: streamData, error: streamError } = getStreamData(BASE_URL);
+
+  const { data: soundClassifierData, error: soundClassifierError } =
+    getSoundClassifier(soundModel, {
+      probabilityThreshold: 0.7,
+    });
+
+  const InitSetup = () => {
+    try {
+      gravitySensor.start();
+      gravitySensor.onreading = () => {
+        if (parseInt(gravitySensor.y) > 2) {
+          setIsPhoneUp(true);
+        } else {
+          setIsPhoneUp(false);
+        }
+      };
+    } catch (error) {
+      console.log(error);
+    }
+
+    try {
+      linearAccelerationSensor.start();
+      linearAccelerationSensor.onreading = () => {
+        if (
+          parseFloat(linearAccelerationSensor.x) > 0.6 ||
+          parseFloat(linearAccelerationSensor.x) < -0.6
+        ) {
+          setIsWalking(true);
+        } else {
+          setIsWalking(false);
+        }
+      };
+    } catch (error) {
+      console.log(error);
+    }
+
+    console.log("streamData", streamData);
+    
+    if (streamData) {
+      if (parseInt(streamData.speed) > 60) {
+        console.log("ZOOOOOOOOOOMMMMMMMMM!!!!!!");
+        // setFoundFastCar(true);
+      } else {
+        // setFoundFastCar(false);
+      }
+    }
+
+    if (soundClassifierData) {
+      const soundConfidence = soundClassifierData.find(
+        (item) => item.label === "Tire Screech"
+      ).confidence;
+
+      if (parseFloat(soundConfidence) > 0.95) {
+        console.log("SCREEEEEEEECHHHHHHH!!!!!!");
+        // setDetectedTireScreech(true);
+      } else {
+        // setDetectedTireScreech(false);
+      }
+    }
+  };
 
   // useEffect(() => {
   //   const interval = setInterval(() => {
@@ -158,6 +172,8 @@ function App() {
   //     }
   //   }
   // }, [linearSensorData]);
+
+  InitSetup();
 
   return (
     <div className="App">

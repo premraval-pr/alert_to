@@ -30,7 +30,7 @@ const data = [
 ];
 let index = 0;
 
-const SEND_INTERVAL = 2000;
+const SEND_INTERVAL = 5000;
 
 const writeEvent = (res, sseId, data) => {
   res.write(`id: ${sseId}\n`);
