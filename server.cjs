@@ -5,10 +5,8 @@ app.use(cors());
 
 const port = 4242;
 
-const data = {
-  cars: 0,
-  speed: 0,
-};
+let car = 0;
+const data = [];
 
 app.use(express.json());
 
@@ -16,14 +14,13 @@ app.post("/data", (req, res) => {
   const speed = req.body.speed || 0;
 
   if (speed > 0) {
-    data.speed += speed;
-    data.cars += 1;
+    data.push({ speed, car: (car += 1) });
   }
 
   return res.json({ message: "Added" });
 });
 
-const SEND_INTERVAL = 2000;
+const SEND_INTERVAL = 10000;
 
 const writeEvent = (res, sseId, data) => {
   res.write(`id: ${sseId}\n`);
