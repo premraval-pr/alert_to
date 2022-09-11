@@ -2,23 +2,59 @@ import React, { useEffect, useState } from "react";
 import { Row, Col, Container, Button } from "react-bootstrap";
 import { useGravitySensor, useLinearAccelerationSensor } from "./hooks";
 import { getStreamData, getSoundClassifier } from "./clients";
+import {
+  LinearAccelerationSensor,
+  GravitySensor,
+} from "motion-sensors-polyfill";
 
 const BASE_URL = "http://localhost:4242/data";
 const soundModel = "SpeechCommands18w";
 
 function App() {
-  const { data: gravitySensorData, error: gravitySensorError } =
-    useGravitySensor();
+  // const { data: gravitySensorData, error: gravitySensorError } =
+  //   useGravitySensor();
 
-  const { data: linearSensorData, error: linearSensorError } =
-    useLinearAccelerationSensor();
+  // const { data: linearSensorData, error: linearSensorError } =
+  //   useLinearAccelerationSensor();
 
-  const { data: streamData, error: streamError } = getStreamData(BASE_URL);
+  // const { data: streamData, error: streamError } = getStreamData(BASE_URL);
 
-  const { data: soundClassifierData, error: soundClassifierError } =
-    getSoundClassifier(soundModel, {
-      probabilityThreshold: 0.7,
-    });
+  // const { data: soundClassifierData, error: soundClassifierError } =
+  //   getSoundClassifier(soundModel, {
+  //     probabilityThreshold: 0.7,
+  //   });
+
+  const gravitySensor = new GravitySensor();
+  const linearAccelerationSensor = new LinearAccelerationSensor();
+
+  try {
+    gravitySensor.start();
+    gravitySensor.onreading = () => {
+      if (parseInt(gravitySensor.y) > 2) {
+        setIsPhoneUp(true);
+      } else {
+        setIsPhoneUp(false);
+      }
+    };
+  } catch (error) {
+    console.log(error);
+  }
+
+  try {
+    linearAccelerationSensor.start();
+    linearAccelerationSensor.onreading = () => {
+      if (
+        parseFloat(linearAccelerationSensor.x) > 0.6 ||
+        parseFloat(linearAccelerationSensor.x) < -0.6
+      ) {
+        setIsWalking(true);
+      } else {
+        setIsWalking(false);
+      }
+    };
+  } catch (error) {
+    console.log(error);
+  }
 
   const [latLng, setLatLng] = useState({ lat: 0, lng: 0 });
   const [isWithinRadius, setIsWithinRadius] = useState(true);
@@ -82,32 +118,32 @@ function App() {
   //   return Value * Math.PI / 180;
   // }
 
-  useEffect(() => {
-    if (gravitySensorData) {
-      if (parseFloat(gravitySensorData.y) > 2.2) {
-        setIsPhoneUp(true);
-      } else {
-        setIsPhoneUp(false);
-      }
-    }
-  }, [gravitySensorData]);
+  // useEffect(() => {
+  //   if (gravitySensorData) {
+  //     if (parseInt(gravitySensorData.y) > 2) {
+  //       setIsPhoneUp(true);
+  //     } else {
+  //       setIsPhoneUp(false);
+  //     }
+  //   }
+  // }, [gravitySensorData]);
 
-  useEffect(() => {
-    if (linearSensorData) {
-      if (
-        parseFloat(linearSensorData.x) > 0.4 ||
-        parseFloat(linearSensorData.y) > 0.4 ||
-        parseFloat(linearSensorData.z) > 0.4 ||
-        parseFloat(linearSensorData.x) < -0.4 ||
-        parseFloat(linearSensorData.y) < -0.4 ||
-        parseFloat(linearSensorData.z) < -0.4
-      ) {
-        setIsWalking(true);
-      } else {
-        setIsWalking(false);
-      }
-    }
-  }, [linearSensorData]);
+  // useEffect(() => {
+  //   if (linearSensorData) {
+  //     if (
+  //       parseFloat(linearSensorData.x) > 0.4 ||
+  //       parseFloat(linearSensorData.y) > 0.4 ||
+  //       parseFloat(linearSensorData.z) > 0.4 ||
+  //       parseFloat(linearSensorData.x) < -0.4 ||
+  //       parseFloat(linearSensorData.y) < -0.4 ||
+  //       parseFloat(linearSensorData.z) < -0.4
+  //     ) {
+  //       setIsWalking(true);
+  //     } else {
+  //       setIsWalking(false);
+  //     }
+  //   }
+  // }, [linearSensorData]);
 
   return (
     <div className="App">
@@ -118,6 +154,7 @@ function App() {
               isPhoneUp
                 ? {
                     backgroundColor: "red",
+                    color: "white",
                   }
                 : {
                     backgroundColor: "lightgreen",
@@ -125,21 +162,40 @@ function App() {
             }
           >
             <h2 className="m-5">Phone is {isPhoneUp ? "up" : "down"}</h2>
+            {/* {gravitySensorData && (
+              <small className="m-5">
+                X: {gravitySensorData.x} | Y: {gravitySensorData.y} | Z:
+                {gravitySensorData.z}
+              </small>
+            )}
+            {gravitySensorError && (
+              <small className="m-5">Error - {gravitySensorError}</small>
+            )} */}
           </Col>
           <Col
             style={
               isWalking
                 ? {
-                    backgroundColor: "green",
+                    backgroundColor: "red",
+                    color: "white",
                   }
                 : {
-                    backgroundColor: "red",
+                    backgroundColor: "lightgreen",
                   }
             }
           >
             <h2 className="m-5">
               User is {isWalking ? "walking" : "not walking"}
             </h2>
+            {/* {linearSensorData && (
+              <small className="m-5">
+                X: {linearSensorData.x} | Y:{linearSensorData.y} | Z:
+                {linearSensorData.z}
+              </small>
+            )}
+            {linearSensorError && (
+              <small className="m-5">Error - {linearSensorError}</small>
+            )} */}
           </Col>
         </Row>
         <Row style={{ height: "400px" }}>
@@ -147,10 +203,11 @@ function App() {
             style={
               isMusicPlaying
                 ? {
-                    backgroundColor: "green",
+                    backgroundColor: "lightgreen",
                   }
                 : {
                     backgroundColor: "red",
+                    color: "white",
                   }
             }
           >
@@ -162,10 +219,11 @@ function App() {
             style={
               isWithinRadius
                 ? {
-                    backgroundColor: "green",
+                    backgroundColor: "lightgreen",
                   }
                 : {
                     backgroundColor: "red",
+                    color: "white",
                   }
             }
           >
